@@ -1,0 +1,57 @@
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load dataset
+df = pd.read_csv('university_student_dashboard_data.csv')
+
+# Dashboard title
+st.title('University Admission, Retention, and Satisfaction Dashboard')
+
+# Metrics Calculation
+applications = df['Applications'].sum()
+admissions = df['Admissions'].sum()
+enrollments = df['Enrollments'].sum()
+
+# Display key metrics
+st.header('Key Metrics')
+col1, col2, col3 = st.columns(3)
+col1.metric('Total Applications', applications)
+col2.metric('Total Admissions', admissions)
+col3.metric('Total Enrollments', enrollments)
+
+# Retention Rate Trend
+st.header('Retention Rate Trends Over Time')
+retention_trend = df.groupby('Year')['RetentionRate'].mean().reset_index()
+st.line_chart(retention_trend.set_index('Year'))
+
+# Student Satisfaction Scores
+st.header('Student Satisfaction Over the Years')
+satisfaction_trend = df.groupby('Year')['SatisfactionScore'].mean()
+st.line_chart(satisfaction_trend)
+
+# Enrollment Breakdown by Department
+st.header('Enrollment Breakdown by Department')
+department_enrollment = df.groupby('Department')['Enrollments'].sum()
+st.bar_chart(department_enrollment.set_index('Department'))
+
+# Spring vs Fall Term Trends
+st.header('Comparison of Spring vs. Fall Terms')
+term_comparison = df.groupby('Term').agg({'Applications':'sum', 'Admissions':'sum', 'Enrollments':'sum'}).reset_index()
+term_melted = pd.melt(term_melted, id_vars='Term', var_name='Metric', value_name='Count')
+
+st.bar_chart(term_melted.pivot(index='Term', columns='Metric', values='Count'))
+
+# Retention and Satisfaction by Department
+st.header('Retention and Satisfaction by Department')
+retention_satisfaction = df.groupby('Department')[['RetentionRate', 'SatisfactionScore']].mean().reset_index()
+st.dataframe(retention_satisfaction)
+
+# Insights
+st.header('Actionable Insights')
+st.markdown('''
+- Departments with consistently lower satisfaction scores should implement targeted improvement initiatives.
+- Retention trends need close monitoring to prevent attrition, particularly in departments with declining trends.
+- Seasonal variations in applications and admissions suggest opportunities for optimized marketing and outreach strategies.
+''')
